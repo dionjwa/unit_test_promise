@@ -6,4 +6,4 @@ haxelib install promhx
 haxelib install nodejs
 
 haxe test/travis.hxml
-node tests.js
+node test/tests.js
