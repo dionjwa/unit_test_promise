@@ -1,0 +1,21 @@
+{
+  "contributors": [
+    "dionjwa"
+  ],
+  "classPath": "src",
+  "dependencies": ["promhx"],
+  "description": "Simple unit testing library using promises.",
+  "license": "BSD",
+  "name": "promise-tests",
+  "releasenote": "Initial upload",
+  "tags": [
+    "nodejs",
+    "node.js",
+    "js",
+    "unit",
+    "promhx",
+    "promise",
+  ],
+  "url": "https://github.com/dionjwa/unit_test_promise",
+  "version": "0.0.1"
+}

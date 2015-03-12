@@ -1,7 +1,5 @@
 package haxe.unit.async;
 
-import js.Node;
-
 import promhx.Deferred;
 import promhx.Promise;
 
