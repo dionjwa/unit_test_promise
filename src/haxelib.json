@@ -3,7 +3,9 @@
     "dionjwa"
   ],
   "classPath": "src",
-  "dependencies": ["promhx"],
+  "dependencies": {
+    "promhx": "1.0.17"
+  },
   "description": "Simple unit testing library using promises.",
   "license": "BSD",
   "name": "promise-tests",
