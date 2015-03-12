@@ -1,0 +1,9 @@
+#!/bin/sh
+#
+# Runs continuous integration tests, used by travis-ci.org
+
+haxelib install promhx
+haxelib install nodejs
+
+haxe test/travis.hxml
+node tests.js
