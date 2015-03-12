@@ -14,7 +14,7 @@
     "js",
     "unit",
     "promhx",
-    "promise",
+    "promise"
   ],
   "url": "https://github.com/dionjwa/unit_test_promise",
   "version": "0.0.1"
