@@ -1,27 +1,27 @@
 {
-    "description": "Simple unit testing library using promhx promises.",
-    "license": "BSD",
+    "description": "Simple unit testing library using promhx promises.", 
+    "license": "BSD", 
     "tags": [
-        "nodejs",
-        "node.js",
-        "node",
-        "js",
-        "unit",
-        "unit tests",
-        "unit test",
-        "promhx",
-        "promise",
+        "nodejs", 
+        "node.js", 
+        "node", 
+        "js", 
+        "unit", 
+        "unit tests", 
+        "unit test", 
+        "promhx", 
+        "promise", 
         "promises"
-    ],
-    "url": "https://github.com/dionjwa/unit_test_promise",
-    "releasenote": "Initial upload",
-    "version": "0.0.2",
-    "classPath": "src",
-    "dependencies": {
-        "promhx": "1.0.17"
-    }, 
+    ], 
+    "url": "https://github.com/dionjwa/unit_test_promise", 
+    "classPath": "src", 
     "contributors": [
         "dionjwa"
     ], 
+    "releasenote": "Initial upload", 
+    "version": "0.0.3", 
+    "dependencies": {
+        "promhx": "1.0.17"
+    }, 
     "name": "promhx-unit-test"
 }
