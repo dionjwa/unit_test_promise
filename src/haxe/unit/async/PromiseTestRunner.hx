@@ -1,5 +1,9 @@
 package haxe.unit.async;
 
+#if nodejs
+import js.Node;
+#end
+
 import promhx.Deferred;
 import promhx.Promise;
 
@@ -29,7 +33,11 @@ class PromiseTestRunner
 		var doTest = null;
 		doTest = function() {
 			if (_tests.length == 0) {
+#if nodejs
+				Node.process.exit(success ? 0 : 1);
+#else
 				Sys.exit(success ? 0 : 1);
+#end
 			} else {
 				var testObj = _tests.shift();
 				runTestsOn(testObj)
