@@ -17,6 +17,8 @@ typedef TestResult = {
 
 class PromiseTestRunner
 {
+	public var onFinish :Void->Void;
+
 	public function new() :Void
 	{
 	}
@@ -33,6 +35,13 @@ class PromiseTestRunner
 		var doTest = null;
 		doTest = function() {
 			if (_tests.length == 0) {
+				try {
+					if (onFinish != null) {
+						onFinish();
+					}
+				} catch (err :Dynamic) {
+					trace(err);
+				}
 #if nodejs
 				Node.process.exit(success ? 0 : 1);
 #else
@@ -50,6 +59,7 @@ class PromiseTestRunner
 			}
 		}
 		doTest();
+		return this;
 	}
 
 	function runTestsOn(testObj :PromiseTest) :Promise<TestResult>

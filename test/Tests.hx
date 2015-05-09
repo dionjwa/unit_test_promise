@@ -7,6 +7,6 @@ class Tests
 		new PromiseTestRunner()
 			.add(new Test1())
 			.add(new Test2())
-			.run();
+			.run().onFinish = function() trace("Finished!");
 	}
 }

@@ -16,8 +16,8 @@
     "contributors": [
         "dionjwa"
     ], 
-    "releasenote": "Initial upload", 
-    "version": "0.0.4", 
+    "releasenote": "Minor convenience fixes", 
+    "version": "0.0.5", 
     "dependencies": {
         "promhx": "1.0.17"
     }, 
