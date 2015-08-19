@@ -17,7 +17,7 @@
         "dionjwa"
     ], 
     "releasenote": "Added extra assertion statements", 
-    "version": "0.0.6", 
+    "version": "0.0.8", 
     "dependencies": {
         "promhx": "1.0.21"
     }, 
