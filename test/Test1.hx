@@ -55,4 +55,15 @@ class Test1 extends PromiseTest
 		}, 50);
 		return deferred.promise();
 	}
+
+	public function testThis5() :Promise<Bool>
+	{
+		assertTrue(true);
+		assertFalse(false);
+		assertIsNull(null);
+		assertNotNull('foo');
+		assertEquals(3, 3);
+		assertNotEquals(3, 4);
+		return Promise.promise(true);
+	}
 }

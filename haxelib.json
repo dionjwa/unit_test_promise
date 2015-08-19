@@ -16,10 +16,10 @@
     "contributors": [
         "dionjwa"
     ], 
-    "releasenote": "Minor convenience fixes", 
-    "version": "0.0.5", 
+    "releasenote": "Added extra assertion statements", 
+    "version": "0.0.6", 
     "dependencies": {
-        "promhx": "1.0.17"
+        "promhx": "1.0.21"
     }, 
     "name": "promhx-unit-test"
 }

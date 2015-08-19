@@ -9,3 +9,5 @@
 -main Tests
 
 -js test/tests.js
+
+-cmd node test/tests.js
