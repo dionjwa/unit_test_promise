@@ -49,13 +49,17 @@ class PromiseTestRunner
 #end
 			} else {
 				var testObj = _tests.shift();
-				runTestsOn(testObj)
-					.then(function(result :TestResult) {
-						if (result.run < result.passed) {
-							success = false;
-						}
-						doTest();
-					});
+				if (testObj == null) {
+					doTest();
+				} else {
+					runTestsOn(testObj)
+						.then(function(result :TestResult) {
+							if (result.run < result.passed) {
+								success = false;
+							}
+							doTest();
+						});
+				}
 			}
 		}
 		doTest();
@@ -74,7 +78,7 @@ class PromiseTestRunner
 		var nextTest = null;
 		nextTest = function(testMethodNames :Array<String>) {
 			if (testMethodNames.length == 0) {
-				trace("Passed " + passed + " / " + run + " " + Type.getClassName(Type.getClass(testObj)));
+				trace("Passed " + passed + " / " + run + " " + className);
 				deferred.resolve({'run':run, 'passed' :passed});
 			} else {
 				var fieldName = testMethodNames.shift();
@@ -97,7 +101,8 @@ class PromiseTestRunner
 						nextTest(testMethodNames);
 					})
 					.errorThen(function(err :Dynamic) {
-						trace("Error cleaning up: " + err);
+						trace(".....FAILED......" + fieldName);
+						trace(err);
 						nextTest(testMethodNames);
 					});
 			}
