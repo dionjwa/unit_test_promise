@@ -16,8 +16,8 @@
     "contributors": [
         "dionjwa"
     ], 
-    "releasenote": "Added extra assertion statements", 
-    "version": "0.0.8", 
+    "releasenote": "Promises are optional returns, when Void is returned, then function is synchronous", 
+    "version": "0.0.9", 
     "dependencies": {
         "promhx": "1.0.21"
     }, 
