@@ -83,10 +83,12 @@ class PromiseTestRunner
 			} else {
 				var fieldName = testMethodNames.shift();
 				run++;
-				testObj.setup()
+				var setupPromise :Null<Promise<Bool>> = testObj.setup();
+				setupPromise = setupPromise == null ? Promise.promise(true) : setupPromise;
+				setupPromise
 					.pipe(function(isSetup :Bool) {
 						var result :Promise<Bool> = Reflect.callMethod(testObj, Reflect.field(testObj, fieldName), []);
-						return result;
+						return result != null ? result : Promise.promise(true);
 					})
 					.pipe(function(didPass :Bool) {
 						if (didPass) {
@@ -95,7 +97,8 @@ class PromiseTestRunner
 						} else {
 							trace(".....FAILED......" + fieldName);
 						}
-						return testObj.tearDown();
+						var tearDown :Null<Promise<Bool>> = testObj.tearDown();
+						return tearDown == null ? Promise.promise(true) : tearDown;
 					})
 					.then(function(didTearDown :Bool) {
 						nextTest(testMethodNames);

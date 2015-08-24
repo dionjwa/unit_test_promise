@@ -1,6 +1,7 @@
 package haxe.unit.async;
 
 import promhx.Promise;
+import promhx.base.AsyncBase;
 
 class PromiseTest
 {
@@ -44,12 +45,12 @@ class PromiseTest
 		}
 	}
 
-	public function setup() :Promise<Bool>
+	public function setup() :Null<Promise<Bool>>
 	{
 		return Promise.promise(true);
 	}
 
-	public function tearDown() :Promise<Bool>
+	public function tearDown() :Null<Promise<Bool>>
 	{
 		return Promise.promise(true);
 	}
