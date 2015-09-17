@@ -19,8 +19,12 @@ class PromiseTestRunner
 {
 	public var onFinish :Void->Void;
 
-	public function new() :Void
+	public function new() :Void {}
+
+	public function setTestTimeout(milliseconds :Int)
 	{
+		_perTestTimeout = milliseconds;
+		return this;
 	}
 
 	public function add(testObject :PromiseTest) :PromiseTestRunner
@@ -52,13 +56,19 @@ class PromiseTestRunner
 				if (testObj == null) {
 					doTest();
 				} else {
-					runTestsOn(testObj)
+					var promise = runTestsOn(testObj)
 						.then(function(result :TestResult) {
 							if (result.run < result.passed) {
 								success = false;
 							}
 							doTest();
 						});
+					var millisecondsDelay = Type.getInstanceFields(Type.getClass(testObj)).filter(function(s) return s.startsWith("test")).length * _perTestTimeout;
+					haxe.Timer.delay(function() {
+						if (!promise.isResolved()) {
+							promise.reject('Timeout');
+						}
+					}, millisecondsDelay);
 				}
 			}
 		}
@@ -117,4 +127,5 @@ class PromiseTestRunner
 	}
 
 	var _tests :Array<PromiseTest> = [];
+	var _perTestTimeout :Int = 100;
 }

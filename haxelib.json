@@ -16,8 +16,8 @@
     "contributors": [
         "dionjwa"
     ], 
-    "releasenote": "Promises are optional returns, when Void is returned, then function is synchronous", 
-    "version": "0.0.9", 
+    "releasenote": "Updated to use clemos's node.js library, added support for timeouts", 
+    "version": "1.0.0", 
     "dependencies": {
         "promhx": "1.0.21"
     }, 
