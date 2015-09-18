@@ -63,12 +63,12 @@ class PromiseTestRunner
 							}
 							doTest();
 						});
-					var millisecondsDelay = Type.getInstanceFields(Type.getClass(testObj)).filter(function(s) return s.startsWith("test")).length * _perTestTimeout;
-					haxe.Timer.delay(function() {
-						if (!promise.isResolved()) {
-							promise.reject('Timeout');
-						}
-					}, millisecondsDelay);
+					// var millisecondsDelay = Type.getInstanceFields(Type.getClass(testObj)).filter(function(s) return s.startsWith("test")).length * _perTestTimeout;
+					// haxe.Timer.delay(function() {
+					// 	if (!promise.isResolved()) {
+					// 		promise.reject('Timeout');
+					// 	}
+					// }, millisecondsDelay);
 				}
 			}
 		}
@@ -98,7 +98,15 @@ class PromiseTestRunner
 				setupPromise
 					.pipe(function(isSetup :Bool) {
 						var result :Promise<Bool> = Reflect.callMethod(testObj, Reflect.field(testObj, fieldName), []);
-						return result != null ? result : Promise.promise(true);
+						if (result == null) {
+							result = Promise.promise(true);
+						}
+						haxe.Timer.delay(function() {
+							if (!result.isResolved()) {
+								result.reject('Timeout');
+							}
+						}, _perTestTimeout);
+						return result;
 					})
 					.pipe(function(didPass :Bool) {
 						if (didPass) {
