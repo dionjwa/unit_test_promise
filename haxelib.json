@@ -17,9 +17,9 @@
         "dionjwa"
     ], 
     "releasenote": "Fixed timeout checks to know which test actually timed out", 
-    "version": "1.0.0", 
+    "version": "1.0.1", 
     "dependencies": {
-        "promhx": "1.0.22"
+        "promhx": "1.0.21"
     }, 
     "name": "promhx-unit-test"
 }
