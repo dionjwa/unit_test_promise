@@ -16,10 +16,10 @@
     "contributors": [
         "dionjwa"
     ], 
-    "releasenote": "Updated to use clemos's node.js library, added support for timeouts", 
+    "releasenote": "Fixed timeout checks to know which test actually timed out", 
     "version": "1.0.0", 
     "dependencies": {
-        "promhx": "1.0.21"
+        "promhx": "1.0.22"
     }, 
     "name": "promhx-unit-test"
 }
