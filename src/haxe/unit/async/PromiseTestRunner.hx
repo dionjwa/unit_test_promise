@@ -23,9 +23,9 @@ class PromiseTestRunner
 
 	public function new() :Void {}
 
-	public function setTestTimeout(milliseconds :Int)
+	public function setDefaultTimeout(milliseconds :Int)
 	{
-		_perTestTimeout = milliseconds;
+		_defaultTestTimeout = milliseconds;
 		return this;
 	}
 
@@ -39,8 +39,11 @@ class PromiseTestRunner
 	{
 		var success = true;
 		var doTest = null;
+		var totalTestsRun = 0;
+		var totalTestsPassed = 0;
 		doTest = function() {
 			if (_tests.length == 0) {
+				trace('TOTAL TESTS PASSED ${totalTestsPassed} / ${totalTestsRun}');
 				try {
 					if (onFinish != null) {
 						onFinish();
@@ -60,17 +63,13 @@ class PromiseTestRunner
 				} else {
 					var promise = runTestsOn(testObj)
 						.then(function(result :TestResult) {
+							totalTestsRun += result.run;
+							totalTestsPassed += result.passed;
 							if (result.run < result.passed) {
 								success = false;
 							}
 							doTest();
 						});
-					// var millisecondsDelay = Type.getInstanceFields(Type.getClass(testObj)).filter(function(s) return s.startsWith("test")).length * _perTestTimeout;
-					// haxe.Timer.delay(function() {
-					// 	if (!promise.isResolved()) {
-					// 		promise.reject('Timeout');
-					// 	}
-					// }, millisecondsDelay);
 				}
 			}
 		}
@@ -95,7 +94,7 @@ class PromiseTestRunner
 			} else {
 				var fieldName = testMethodNames.shift();
 
-				var timeout = _perTestTimeout;
+				var timeout = _defaultTestTimeout;
 				var fieldMetaData = Reflect.field(Meta.getFields(Type.getClass(testObj)), fieldName);
 				if (fieldMetaData != null && Reflect.hasField(fieldMetaData, 'timeout')) {
 					timeout = Reflect.field(fieldMetaData, 'timeout');
@@ -144,5 +143,5 @@ class PromiseTestRunner
 	}
 
 	var _tests :Array<PromiseTest> = [];
-	var _perTestTimeout :Int = 60;
+	var _defaultTestTimeout :Int = 60;
 }
