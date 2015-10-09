@@ -4,6 +4,8 @@ package haxe.unit.async;
 import js.Node;
 #end
 
+import haxe.rtti.Meta;
+
 import promhx.Deferred;
 import promhx.Promise;
 
@@ -92,6 +94,13 @@ class PromiseTestRunner
 				deferred.resolve({'run':run, 'passed' :passed});
 			} else {
 				var fieldName = testMethodNames.shift();
+
+				var timeout = _perTestTimeout;
+				var fieldMetaData = Reflect.field(Meta.getFields(Type.getClass(testObj)), fieldName);
+				if (fieldMetaData != null && Reflect.hasField(fieldMetaData, 'timeout')) {
+					timeout = Reflect.field(fieldMetaData, 'timeout');
+				}
+
 				run++;
 				var setupPromise :Null<Promise<Bool>> = testObj.setup();
 				setupPromise = setupPromise == null ? Promise.promise(true) : setupPromise;
@@ -105,7 +114,7 @@ class PromiseTestRunner
 							if (!result.isResolved()) {
 								result.reject('Timeout');
 							}
-						}, _perTestTimeout);
+						}, timeout);
 						return result;
 					})
 					.pipe(function(didPass :Bool) {
@@ -135,5 +144,5 @@ class PromiseTestRunner
 	}
 
 	var _tests :Array<PromiseTest> = [];
-	var _perTestTimeout :Int = 100;
+	var _perTestTimeout :Int = 60;
 }

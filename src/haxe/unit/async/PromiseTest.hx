@@ -1,5 +1,14 @@
 package haxe.unit.async;
 
+/**
+ * And subclasses with methods beginning with 'test'
+ * are considered test functions.
+ *
+ * Test functions can have the following metadata:
+ *
+ * @timeout(100)	This sets a custom timeout for that test
+ */
+
 import promhx.Promise;
 import promhx.base.AsyncBase;
 

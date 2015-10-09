@@ -29,6 +29,7 @@ class Test1 extends PromiseTest
 		return Promise.promise(true);
 	}
 
+	@timeout(150)
 	public function testThis2() :Promise<Bool>
 	{
 		var deferred = new Deferred();
@@ -38,6 +39,7 @@ class Test1 extends PromiseTest
 		return deferred.promise();
 	}
 
+	@timeout(100)
 	public function testThis3() :Promise<Bool>
 	{
 		var deferred = new Deferred();
