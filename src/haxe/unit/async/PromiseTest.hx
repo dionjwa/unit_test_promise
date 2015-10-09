@@ -26,7 +26,7 @@ class PromiseTest
 		assertTrue(!expression, posInfos);
 	}
 
-	public function assertEquals(val1 :Dynamic, val2 :Dynamic, ?posInfos :haxe.PosInfos) :Void
+	public function assertEquals<T>(val1 :T, val2 :T, ?posInfos :haxe.PosInfos) :Void
 	{
 		if (val1 != val2) {
 			throw '${posInfos.className}.${posInfos.methodName}:${posInfos.lineNumber} Failed assertion: ${val1} != ${val2}';
