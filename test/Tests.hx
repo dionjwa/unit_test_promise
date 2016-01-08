@@ -7,6 +7,7 @@ class Tests
 		new PromiseTestRunner()
 			.add(new Test1())
 			.add(new Test2())
+			.add(new Skip())
 			.run().onFinish = function() trace("Finished!");
 	}
 }

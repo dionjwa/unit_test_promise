@@ -19,9 +19,16 @@ typedef TestResult = {
 
 class PromiseTestRunner
 {
+	private var totalTestsRun :Int;
+	private var totalTestsPassed :Int;
+
 	public var onFinish :Void->Void;
 
-	public function new() :Void {}
+	public function new() :Void
+	{
+		totalTestsRun = 0;
+		totalTestsPassed = 0;
+	}
 
 	public function setDefaultTimeout(milliseconds :Int)
 	{
@@ -39,8 +46,8 @@ class PromiseTestRunner
 	{
 		var success = true;
 		var doTest = null;
-		var totalTestsRun = 0;
-		var totalTestsPassed = 0;
+		totalTestsRun = 0;
+		totalTestsPassed = 0;
 		doTest = function() {
 			if (_tests.length == 0) {
 				trace('TOTAL TESTS PASSED ${totalTestsPassed} / ${totalTestsRun}');
@@ -137,9 +144,34 @@ class PromiseTestRunner
 			}
 		}
 
-		nextTest(Type.getInstanceFields(Type.getClass(testObj)).filter(function(s) return s.startsWith("test")));
+		nextTest(getActiveTests(testObj));
 
 		return promise;
+	}
+
+	private static function getActiveTests(testObj :PromiseTest) :Array<String>
+	{
+		var testClass = Type.getClass(testObj);
+		return Type.getInstanceFields(testClass).filter(function (fieldName) {
+			if (fieldName.startsWith("test")) {
+				var fieldMetaData = Reflect.field(Meta.getFields(testClass), fieldName);
+				if (fieldMetaData == null || !Reflect.hasField(fieldMetaData, 'skip')) {
+					return true;
+				}
+			}
+
+			return false;
+		});
+	}
+
+	public function getTotalTestsRun() :Int
+	{
+		return totalTestsRun;
+	}
+
+	public function getTotalTestsPassed() :Int
+	{
+		return totalTestsPassed;
 	}
 
 	var _tests :Array<PromiseTest> = [];
