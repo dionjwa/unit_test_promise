@@ -21,6 +21,7 @@ class PromiseTestRunner
 {
 	private var totalTestsRun :Int;
 	private var totalTestsPassed :Int;
+	private var skipExit :Bool;
 
 	public var onFinish :Void->Void;
 
@@ -28,6 +29,12 @@ class PromiseTestRunner
 	{
 		totalTestsRun = 0;
 		totalTestsPassed = 0;
+		skipExit = false;
+	}
+
+	public function setSkipExit(value :Bool)
+	{
+		skipExit = value;
 	}
 
 	public function setDefaultTimeout(milliseconds :Int)
@@ -42,6 +49,16 @@ class PromiseTestRunner
 		return this;
 	}
 
+	private function exitWithStatus(success :Bool) {
+		if(!skipExit) {
+#if nodejs
+			Node.process.exit(success ? 0 : 1);
+#else
+			Sys.exit(success ? 0 : 1);
+#end
+		}
+	}
+
 	public function run()
 	{
 		var success = true;
@@ -52,17 +69,15 @@ class PromiseTestRunner
 			if (_tests.length == 0) {
 				trace('TOTAL TESTS PASSED ${totalTestsPassed} / ${totalTestsRun}');
 				try {
-					if (onFinish != null) {
-						onFinish();
-					}
+					haxe.Timer.delay(function () {
+						if (onFinish != null) {
+							onFinish();
+						}
+						exitWithStatus(success);
+					}, 0);
 				} catch (err :Dynamic) {
 					trace(err);
 				}
-#if nodejs
-				Node.process.exit(success ? 0 : 1);
-#else
-				Sys.exit(success ? 0 : 1);
-#end
 			} else {
 				var testObj = _tests.shift();
 				if (testObj == null) {
@@ -72,7 +87,7 @@ class PromiseTestRunner
 						.then(function(result :TestResult) {
 							totalTestsRun += result.run;
 							totalTestsPassed += result.passed;
-							if (result.run < result.passed) {
+							if (result.run > result.passed) {
 								success = false;
 							}
 							doTest();
