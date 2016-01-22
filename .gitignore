@@ -4,3 +4,5 @@ unit_test_promise.sublime-workspace
 test/tests.js
 test/tests.js.map
 .haxelib
+unit_test_promise.iml
+.idea

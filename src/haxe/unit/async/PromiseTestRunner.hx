@@ -19,9 +19,23 @@ typedef TestResult = {
 
 class PromiseTestRunner
 {
+	private var totalTestsRun :Int;
+	private var totalTestsPassed :Int;
+	private var skipExit :Bool;
+
 	public var onFinish :Void->Void;
 
-	public function new() :Void {}
+	public function new() :Void
+	{
+		totalTestsRun = 0;
+		totalTestsPassed = 0;
+		skipExit = false;
+	}
+
+	public function setSkipExit(value :Bool)
+	{
+		skipExit = value;
+	}
 
 	public function setDefaultTimeout(milliseconds :Int)
 	{
@@ -35,27 +49,35 @@ class PromiseTestRunner
 		return this;
 	}
 
+	private function exitWithStatus(success :Bool) {
+		if(!skipExit) {
+#if nodejs
+			Node.process.exit(success ? 0 : 1);
+#else
+			Sys.exit(success ? 0 : 1);
+#end
+		}
+	}
+
 	public function run()
 	{
 		var success = true;
 		var doTest = null;
-		var totalTestsRun = 0;
-		var totalTestsPassed = 0;
+		totalTestsRun = 0;
+		totalTestsPassed = 0;
 		doTest = function() {
 			if (_tests.length == 0) {
 				trace('TOTAL TESTS PASSED ${totalTestsPassed} / ${totalTestsRun}');
 				try {
-					if (onFinish != null) {
-						onFinish();
-					}
+					haxe.Timer.delay(function () {
+						if (onFinish != null) {
+							onFinish();
+						}
+						exitWithStatus(success);
+					}, 0);
 				} catch (err :Dynamic) {
 					trace(err);
 				}
-#if nodejs
-				Node.process.exit(success ? 0 : 1);
-#else
-				Sys.exit(success ? 0 : 1);
-#end
 			} else {
 				var testObj = _tests.shift();
 				if (testObj == null) {
@@ -65,7 +87,7 @@ class PromiseTestRunner
 						.then(function(result :TestResult) {
 							totalTestsRun += result.run;
 							totalTestsPassed += result.passed;
-							if (result.run < result.passed) {
+							if (result.run > result.passed) {
 								success = false;
 							}
 							doTest();
@@ -137,9 +159,34 @@ class PromiseTestRunner
 			}
 		}
 
-		nextTest(Type.getInstanceFields(Type.getClass(testObj)).filter(function(s) return s.startsWith("test")));
+		nextTest(getActiveTests(testObj));
 
 		return promise;
+	}
+
+	private static function getActiveTests(testObj :PromiseTest) :Array<String>
+	{
+		var testClass = Type.getClass(testObj);
+		return Type.getInstanceFields(testClass).filter(function (fieldName) {
+			if (fieldName.startsWith("test")) {
+				var fieldMetaData = Reflect.field(Meta.getFields(testClass), fieldName);
+				if (fieldMetaData == null || !Reflect.hasField(fieldMetaData, 'skip')) {
+					return true;
+				}
+			}
+
+			return false;
+		});
+	}
+
+	public function getTotalTestsRun() :Int
+	{
+		return totalTestsRun;
+	}
+
+	public function getTotalTestsPassed() :Int
+	{
+		return totalTestsPassed;
 	}
 
 	var _tests :Array<PromiseTest> = [];

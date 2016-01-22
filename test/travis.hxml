@@ -3,6 +3,7 @@
 -D nodejs
 
 -lib promhx
+-lib nodejs
 
 -cp lib/haxe-js-kit
 -cp src
