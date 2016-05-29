@@ -16,8 +16,8 @@
     "contributors": [
         "dionjwa"
     ], 
-    "releasenote": "Type the returns.", 
-    "version": "1.1.4", 
+    "releasenote": "Fix stack traces not showing on errors.", 
+    "version": "1.1.5", 
     "dependencies": {
         "promhx": "1.0.21"
     }, 
