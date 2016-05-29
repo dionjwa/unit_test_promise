@@ -76,7 +76,11 @@ class PromiseTestRunner
 						exitWithStatus(success);
 					}, 0);
 				} catch (err :Dynamic) {
-					trace(err);
+					try {
+						trace(err.stack);
+					} catch (e :Dynamic) {
+						trace(err);
+					}
 				}
 			} else {
 				var testObj = _tests.shift();
@@ -153,7 +157,11 @@ class PromiseTestRunner
 					})
 					.errorThen(function(err :Dynamic) {
 						trace(".....FAILED......" + fieldName);
-						trace(err);
+						try {
+							trace(err.stack);
+						} catch (_:Dynamic) {
+							trace(err);
+						}
 						nextTest(testMethodNames);
 					});
 			}
