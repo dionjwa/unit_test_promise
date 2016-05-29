@@ -3,9 +3,8 @@
 -D nodejs
 
 -lib promhx
--lib nodejs
+-lib hxnodejs:4.0.8
 
--cp lib/haxe-js-kit
 -cp src
 -cp test
 
