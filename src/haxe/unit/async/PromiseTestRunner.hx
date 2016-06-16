@@ -8,6 +8,7 @@ import haxe.rtti.Meta;
 
 import promhx.Deferred;
 import promhx.Promise;
+import promhx.deferred.DeferredPromise;
 
 using Lambda;
 using StringTools;
@@ -19,22 +20,13 @@ typedef TestResult = {
 
 class PromiseTestRunner
 {
-	private var totalTestsRun :Int;
-	private var totalTestsPassed :Int;
-	private var skipExit :Bool;
-
-	public var onFinish :Void->Void;
+	private var _totalTestsRun :Int;
+	private var _totalTestsPassed :Int;
 
 	public function new() :Void
 	{
-		totalTestsRun = 0;
-		totalTestsPassed = 0;
-		skipExit = false;
-	}
-
-	public function setSkipExit(value :Bool)
-	{
-		skipExit = value;
+		_totalTestsRun = 0;
+		_totalTestsPassed = 0;
 	}
 
 	public function setDefaultTimeout(milliseconds :Int)
@@ -49,35 +41,31 @@ class PromiseTestRunner
 		return this;
 	}
 
-	private function exitWithStatus(success :Bool) {
-		if(!skipExit) {
-#if nodejs
-			Node.process.exit(success ? 0 : 1);
-#else
-			Sys.exit(success ? 0 : 1);
-#end
-		}
-	}
-
-	public function run()
+	public function run(?exitOnFinish :Bool = true) :Promise<Bool>
 	{
+		var promise = new DeferredPromise();
 		var success = true;
 		var doTest = null;
-		totalTestsRun = 0;
-		totalTestsPassed = 0;
+		_totalTestsRun = 0;
+		_totalTestsPassed = 0;
 		doTest = function() {
 			if (_tests.length == 0) {
-				trace('TOTAL TESTS PASSED ${totalTestsPassed} / ${totalTestsRun}');
+				trace('TOTAL TESTS PASSED ${_totalTestsPassed} / ${_totalTestsRun}');
 				try {
 					haxe.Timer.delay(function () {
-						if (onFinish != null) {
-							onFinish();
+						promise.resolve(success);
+						if (exitOnFinish) {
+#if nodejs
+							Node.process.exit(success ? 0 : 1);
+#else
+							Sys.exit(success ? 0 : 1);
+#end
 						}
-						exitWithStatus(success);
 					}, 0);
 				} catch (err :Dynamic) {
 					try {
-						trace(err.stack);
+						trace(err);
+						promise.boundPromise.reject(err);
 					} catch (e :Dynamic) {
 						trace(err);
 					}
@@ -89,8 +77,8 @@ class PromiseTestRunner
 				} else {
 					var promise = runTestsOn(testObj)
 						.then(function(result :TestResult) {
-							totalTestsRun += result.run;
-							totalTestsPassed += result.passed;
+							_totalTestsRun += result.run;
+							_totalTestsPassed += result.passed;
 							if (result.run > result.passed) {
 								success = false;
 							}
@@ -100,7 +88,7 @@ class PromiseTestRunner
 			}
 		}
 		doTest();
-		return this;
+		return promise.boundPromise;
 	}
 
 	function runTestsOn(testObj :PromiseTest) :Promise<TestResult>
@@ -189,12 +177,12 @@ class PromiseTestRunner
 
 	public function getTotalTestsRun() :Int
 	{
-		return totalTestsRun;
+		return _totalTestsRun;
 	}
 
 	public function getTotalTestsPassed() :Int
 	{
-		return totalTestsPassed;
+		return _totalTestsPassed;
 	}
 
 	var _tests :Array<PromiseTest> = [];

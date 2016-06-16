@@ -14,16 +14,10 @@ class SkipTest extends PromiseTest
 			.pipe(function (_) {
 				var runner = new PromiseTestRunner();
 				runner.add(new Skip());
-				runner.setSkipExit(true);
-				var deferred = new DeferredPromise();
-				runner.run().onFinish = function() {
-					if (runner.getTotalTestsRun() == 0) {
-						deferred.resolve(true);
-					} else {
-						deferred.boundPromise.reject('runner.getTotalTestsRun()=${runner.getTotalTestsRun()}');
-					}
-				};
-				return deferred.boundPromise;
+				return runner.run(false)
+					.then(function(_) {
+						return true;
+					});
 		});
 	}
 }
