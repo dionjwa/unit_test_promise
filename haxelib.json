@@ -16,8 +16,8 @@
     "contributors": [
         "dionjwa"
     ], 
-    "releasenote": "API change, test runner returns a promise, allowing embedding", 
-    "version": "2.0.0", 
+    "releasenote": "Coloured result text", 
+    "version": "2.0.1", 
     "dependencies": {
         "promhx": "1.0.21"
     }, 

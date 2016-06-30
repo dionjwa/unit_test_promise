@@ -3,7 +3,7 @@
 -D nodejs
 
 -lib promhx
--lib hxnodejs:4.0.8
+-lib hxnodejs:4.0.9
 
 -cp src
 -cp test

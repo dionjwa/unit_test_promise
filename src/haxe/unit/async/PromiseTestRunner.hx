@@ -20,6 +20,9 @@ typedef TestResult = {
 
 class PromiseTestRunner
 {
+	static var RED="\033[0;31m";
+	static var GREEN="\033[0;32m";
+	static var NC="\033[0m";//No Color
 	private var _totalTestsRun :Int;
 	private var _totalTestsPassed :Int;
 
@@ -50,7 +53,11 @@ class PromiseTestRunner
 		_totalTestsPassed = 0;
 		doTest = function() {
 			if (_tests.length == 0) {
-				trace('TOTAL TESTS PASSED ${_totalTestsPassed} / ${_totalTestsRun}');
+				if (_totalTestsPassed < _totalTestsRun) {
+					trace('${RED}TOTAL TESTS PASSED ${_totalTestsPassed} / ${_totalTestsRun}${NC}');
+				} else {
+					trace('${GREEN}TOTAL TESTS PASSED ${_totalTestsPassed} / ${_totalTestsRun}${NC}');
+				}
 				try {
 					haxe.Timer.delay(function () {
 						promise.resolve(success);
@@ -103,7 +110,11 @@ class PromiseTestRunner
 		var nextTest = null;
 		nextTest = function(testMethodNames :Array<String>) {
 			if (testMethodNames.length == 0) {
-				trace("Passed " + passed + " / " + run + " " + className);
+				if (passed < run) {
+					trace('${RED}Passed $passed / $run ${className}${NC}');
+				} else {
+					trace('${GREEN}Passed $passed / $run ${className}${NC}');
+				}
 				deferred.resolve({'run':run, 'passed' :passed});
 			} else {
 				var fieldName = testMethodNames.shift();
@@ -133,9 +144,9 @@ class PromiseTestRunner
 					.pipe(function(didPass :Bool) {
 						if (didPass) {
 							passed++;
-							trace(".....Success....." + fieldName);
+							trace('${GREEN}.....Success.....${fieldName}${NC}');
 						} else {
-							trace(".....FAILED......" + fieldName);
+							trace('${RED}.....FAILED......${fieldName}${NC}');
 						}
 						var tearDown :Null<Promise<Bool>> = testObj.tearDown();
 						return tearDown == null ? Promise.promise(true) : tearDown;
@@ -144,7 +155,7 @@ class PromiseTestRunner
 						nextTest(testMethodNames);
 					})
 					.errorThen(function(err :Dynamic) {
-						trace(".....FAILED......" + fieldName);
+						trace('${RED}.....FAILED......${fieldName}${NC}');
 						try {
 							trace(err.stack);
 						} catch (_:Dynamic) {
