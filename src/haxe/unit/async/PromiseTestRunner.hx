@@ -155,12 +155,19 @@ class PromiseTestRunner
 						nextTest(testMethodNames);
 					})
 					.errorThen(function(err :Dynamic) {
-						trace('${RED}.....FAILED......${fieldName}${NC}');
-						try {
-							trace(err.stack);
-						} catch (_:Dynamic) {
-							trace(err);
+						var errorString :String = '';
+						if (err != null) {
+							try {
+								if (Reflect.hasField(err, 'stack')) {
+									errorString = err.stack;
+								} else {
+									errorString = err + '';
+								}
+							} catch (_:Dynamic) {
+								trace(err);
+							}
 						}
+						trace('${RED}.....FAILED......${fieldName}\n${errorString}${NC}');
 						nextTest(testMethodNames);
 					});
 			}

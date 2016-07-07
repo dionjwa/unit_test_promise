@@ -17,7 +17,7 @@
         "dionjwa"
     ], 
     "releasenote": "Coloured result text", 
-    "version": "2.0.1", 
+    "version": "2.0.2", 
     "dependencies": {
         "promhx": "1.0.21"
     }, 
