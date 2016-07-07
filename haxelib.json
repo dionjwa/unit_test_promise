@@ -16,8 +16,8 @@
     "contributors": [
         "dionjwa"
     ], 
-    "releasenote": "Coloured result text", 
-    "version": "2.0.2", 
+    "releasenote": "Better structure to run internally multiple times and control output", 
+    "version": "2.1.0", 
     "dependencies": {
         "promhx": "1.0.21"
     }, 

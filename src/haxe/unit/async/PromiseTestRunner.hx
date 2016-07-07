@@ -18,13 +18,28 @@ typedef TestResult = {
 	var passed :Int;
 }
 
+typedef Test = {
+	var name :String;
+	@:optional var error :String;
+	var passed :Bool;
+}
+
+typedef CompleteTestResult = {
+	var tests :Array<Test>;
+	var run :Int;
+	var passed :Int;
+	var success :Bool;
+}
+
 class PromiseTestRunner
 {
 	static var RED="\033[0;31m";
 	static var GREEN="\033[0;32m";
 	static var NC="\033[0m";//No Color
-	private var _totalTestsRun :Int;
-	private var _totalTestsPassed :Int;
+	var _totalTestsRun :Int;
+	var _totalTestsPassed :Int;
+	var _finalTestResult :CompleteTestResult;
+	var _disableTrace :Bool = false;
 
 	public function new() :Void
 	{
@@ -44,23 +59,25 @@ class PromiseTestRunner
 		return this;
 	}
 
-	public function run(?exitOnFinish :Bool = true) :Promise<Bool>
+	public function run(?exitOnFinish :Bool = true, ?disableTrace :Bool = false) :Promise<CompleteTestResult>
 	{
+		_disableTrace = disableTrace;
 		var promise = new DeferredPromise();
 		var success = true;
 		var doTest = null;
 		_totalTestsRun = 0;
 		_totalTestsPassed = 0;
+		_finalTestResult = {tests:[], run:0, passed:0, success:true};
 		doTest = function() {
 			if (_tests.length == 0) {
 				if (_totalTestsPassed < _totalTestsRun) {
-					trace('${RED}TOTAL TESTS PASSED ${_totalTestsPassed} / ${_totalTestsRun}${NC}');
+					traceRed('TOTAL TESTS PASSED ${_totalTestsPassed} / ${_totalTestsRun}');
 				} else {
-					trace('${GREEN}TOTAL TESTS PASSED ${_totalTestsPassed} / ${_totalTestsRun}${NC}');
+					traceGreen('TOTAL TESTS PASSED ${_totalTestsPassed} / ${_totalTestsRun}');
 				}
 				try {
 					haxe.Timer.delay(function () {
-						promise.resolve(success);
+						promise.resolve(_finalTestResult);
 						if (exitOnFinish) {
 #if nodejs
 							Node.process.exit(success ? 0 : 1);
@@ -83,7 +100,8 @@ class PromiseTestRunner
 					doTest();
 				} else {
 					var promise = runTestsOn(testObj)
-						.then(function(result :TestResult) {
+						.then(function(result :CompleteTestResult) {
+							_finalTestResult = merge(_finalTestResult, result);
 							_totalTestsRun += result.run;
 							_totalTestsPassed += result.passed;
 							if (result.run > result.passed) {
@@ -98,24 +116,25 @@ class PromiseTestRunner
 		return promise.boundPromise;
 	}
 
-	function runTestsOn(testObj :PromiseTest) :Promise<TestResult>
+	function runTestsOn(testObj :PromiseTest) :Promise<CompleteTestResult>
 	{
+		var alltestsResult :CompleteTestResult = {tests:[], run:0, passed:0, success:true};
 		var className = Type.getClassName(Type.getClass(testObj));
 		var deferred = new Deferred();
 		var promise = deferred.promise();
 
-		var run = 0;
-		var passed = 0;
-
 		var nextTest = null;
 		nextTest = function(testMethodNames :Array<String>) {
 			if (testMethodNames.length == 0) {
-				if (passed < run) {
-					trace('${RED}Passed $passed / $run ${className}${NC}');
+				alltestsResult.run = alltestsResult.tests.length;
+				alltestsResult.passed = alltestsResult.tests.count(function(t) return t.passed);
+				alltestsResult.success = alltestsResult.run == alltestsResult.passed;
+				if (!alltestsResult.success) {
+					traceRed('Passed ${alltestsResult.passed} / ${alltestsResult.run} ${className}');
 				} else {
-					trace('${GREEN}Passed $passed / $run ${className}${NC}');
+					traceGreen('Passed ${alltestsResult.passed} / ${alltestsResult.run} ${className}');
 				}
-				deferred.resolve({'run':run, 'passed' :passed});
+				deferred.resolve(alltestsResult);
 			} else {
 				var fieldName = testMethodNames.shift();
 
@@ -124,8 +143,10 @@ class PromiseTestRunner
 				if (fieldMetaData != null && Reflect.hasField(fieldMetaData, 'timeout')) {
 					timeout = Reflect.field(fieldMetaData, 'timeout');
 				}
+				var testResult = {name:fieldName, error:null, passed:false};
 
-				run++;
+				// alltestsResult.run++;
+				alltestsResult.tests.push(testResult);
 				var setupPromise :Null<Promise<Bool>> = testObj.setup();
 				setupPromise = setupPromise == null ? Promise.promise(true) : setupPromise;
 				setupPromise
@@ -137,7 +158,7 @@ class PromiseTestRunner
 						}
 						var timer = haxe.Timer.delay(function() {
 							if (!promise.boundPromise.isErrored() && !promise.boundPromise.isFulfilled() && !promise.boundPromise.isRejected() && !promise.boundPromise.isResolved()) {
-								trace('${RED}.....${fieldName} timed out.....${NC}');
+								traceRed('.....${fieldName} timed out.....');
 								promise.boundPromise.reject('Timeout');
 							}
 						}, timeout);
@@ -156,10 +177,11 @@ class PromiseTestRunner
 					})
 					.pipe(function(didPass :Bool) {
 						if (didPass) {
-							passed++;
-							trace('${GREEN}.....Success.....${fieldName}${NC}');
+							testResult.passed = true;
+							// alltestsResult.passed++;
+							traceGreen('.....Success.....${fieldName}');
 						} else {
-							trace('${RED}.....FAILED......${fieldName}${NC}');
+							traceRed('.....FAILED......${fieldName}');
 						}
 						var tearDown :Null<Promise<Bool>> = testObj.tearDown();
 						return tearDown == null ? Promise.promise(true) : tearDown;
@@ -180,7 +202,8 @@ class PromiseTestRunner
 								trace(err);
 							}
 						}
-						trace('${RED}.....FAILED......${fieldName}\n${errorString}${NC}');
+						testResult.error = errorString;
+						traceRed('.....FAILED......${fieldName}\n${errorString}');
 						nextTest(testMethodNames);
 					});
 			}
@@ -214,6 +237,30 @@ class PromiseTestRunner
 	public function getTotalTestsPassed() :Int
 	{
 		return _totalTestsPassed;
+	}
+
+	function traceRed(s :Dynamic)
+	{
+		if (!_disableTrace) {
+			trace('${RED}${s}${NC}');
+		}
+	}
+
+	function traceGreen(s :Dynamic)
+	{
+		if (!_disableTrace) {
+			trace('${GREEN}${s}${NC}');
+		}
+	}
+
+	static function merge(a :CompleteTestResult, b :CompleteTestResult) :CompleteTestResult
+	{
+		var merged :CompleteTestResult = {run:0, passed:0, tests:[], success:true};
+		merged.run =  a.run + b.run;
+		merged.passed =  a.passed + b.passed;
+		merged.tests = a.tests.concat(b.tests);
+		merged.success = a.success && b.success;
+		return merged;
 	}
 
 	var _tests :Array<PromiseTest> = [];
