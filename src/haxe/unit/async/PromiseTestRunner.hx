@@ -130,16 +130,29 @@ class PromiseTestRunner
 				setupPromise = setupPromise == null ? Promise.promise(true) : setupPromise;
 				setupPromise
 					.pipe(function(isSetup :Bool) {
+						var promise = new DeferredPromise();
 						var result :Promise<Bool> = Reflect.callMethod(testObj, Reflect.field(testObj, fieldName), []);
 						if (result == null) {
 							result = Promise.promise(true);
 						}
-						haxe.Timer.delay(function() {
-							if (!result.isResolved()) {
-								result.reject('Timeout');
+						var timer = haxe.Timer.delay(function() {
+							if (!promise.boundPromise.isErrored() && !promise.boundPromise.isFulfilled() && !promise.boundPromise.isRejected() && !promise.boundPromise.isResolved()) {
+								trace('${RED}.....${fieldName} timed out.....${NC}');
+								promise.boundPromise.reject('Timeout');
 							}
 						}, timeout);
-						return result;
+						result
+							.then(function(out) {
+								timer.stop();
+								if (!promise.boundPromise.isErrored() && !promise.boundPromise.isFulfilled() && !promise.boundPromise.isRejected() && !promise.boundPromise.isResolved()) {
+									promise.resolve(out);
+								}
+							})
+							.catchError(function(err) {
+								timer.stop();
+								promise.boundPromise.reject(err);
+							});
+						return promise.boundPromise;
 					})
 					.pipe(function(didPass :Bool) {
 						if (didPass) {
