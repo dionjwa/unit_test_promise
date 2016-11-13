@@ -159,7 +159,7 @@ class PromiseTestRunner
 						var timer = haxe.Timer.delay(function() {
 							if (!promise.boundPromise.isErrored() && !promise.boundPromise.isFulfilled() && !promise.boundPromise.isRejected() && !promise.boundPromise.isResolved()) {
 								traceRed('.....${fieldName} timed out.....');
-								promise.boundPromise.reject('Timeout');
+								promise.boundPromise.reject('PromiseTestRunner runTestsOn ${className}.${fieldName} Timeout');
 							}
 						}, timeout);
 						result

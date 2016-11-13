@@ -16,8 +16,8 @@
     "contributors": [
         "dionjwa"
     ], 
-    "releasenote": "Better structure to run internally multiple times and control output", 
-    "version": "2.1.1", 
+    "releasenote": "Improved error strings", 
+    "version": "2.1.2", 
     "dependencies": {
         "promhx": "1.1.0"
     }, 
