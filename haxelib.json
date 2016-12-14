@@ -16,8 +16,8 @@
     "contributors": [
         "dionjwa"
     ], 
-    "releasenote": "Improved error strings", 
-    "version": "2.1.2", 
+    "releasenote": "Fixed multiple promise resolving", 
+    "version": "2.1.3", 
     "dependencies": {
         "promhx": "1.1.0"
     }, 

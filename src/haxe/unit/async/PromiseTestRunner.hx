@@ -77,7 +77,11 @@ class PromiseTestRunner
 				}
 				try {
 					haxe.Timer.delay(function () {
-						promise.resolve(_finalTestResult);
+						if (promise != null) {
+							promise.resolve(_finalTestResult);
+							promise = null;
+						}
+
 						if (exitOnFinish) {
 #if nodejs
 							Node.process.exit(success ? 0 : 1);
@@ -89,7 +93,10 @@ class PromiseTestRunner
 				} catch (err :Dynamic) {
 					try {
 						trace(err);
-						promise.boundPromise.reject(err);
+						if (promise != null) {
+							promise.boundPromise.reject(err);
+							promise = null;
+						}
 					} catch (e :Dynamic) {
 						trace(err);
 					}
@@ -99,7 +106,7 @@ class PromiseTestRunner
 				if (testObj == null) {
 					doTest();
 				} else {
-					var promise = runTestsOn(testObj)
+					runTestsOn(testObj)
 						.then(function(result :CompleteTestResult) {
 							_finalTestResult = merge(_finalTestResult, result);
 							_totalTestsRun += result.run;
@@ -107,6 +114,10 @@ class PromiseTestRunner
 							if (result.run > result.passed) {
 								success = false;
 							}
+							doTest();
+						})
+						.catchError(function(err) {
+							trace(err);
 							doTest();
 						});
 				}
@@ -120,8 +131,7 @@ class PromiseTestRunner
 	{
 		var alltestsResult :CompleteTestResult = {tests:[], run:0, passed:0, success:true};
 		var className = Type.getClassName(Type.getClass(testObj));
-		var deferred = new Deferred();
-		var promise = deferred.promise();
+		var promise = new DeferredPromise();
 
 		var nextTest = null;
 		nextTest = function(testMethodNames :Array<String>) {
@@ -134,7 +144,10 @@ class PromiseTestRunner
 				} else {
 					traceGreen('Passed ${alltestsResult.passed} / ${alltestsResult.run} ${className}');
 				}
-				deferred.resolve(alltestsResult);
+				if (promise != null) {
+					promise.resolve(alltestsResult);
+					promise = null;
+				}
 			} else {
 				var fieldName = testMethodNames.shift();
 
@@ -151,29 +164,36 @@ class PromiseTestRunner
 				setupPromise = setupPromise == null ? Promise.promise(true) : setupPromise;
 				setupPromise
 					.pipe(function(isSetup :Bool) {
-						var promise = new DeferredPromise();
+						var p = new DeferredPromise();
 						var result :Promise<Bool> = Reflect.callMethod(testObj, Reflect.field(testObj, fieldName), []);
 						if (result == null) {
 							result = Promise.promise(true);
 						}
 						var timer = haxe.Timer.delay(function() {
-							if (!promise.boundPromise.isErrored() && !promise.boundPromise.isFulfilled() && !promise.boundPromise.isRejected() && !promise.boundPromise.isResolved()) {
+							if (p != null) {
 								traceRed('.....${fieldName} timed out.....');
-								promise.boundPromise.reject('PromiseTestRunner runTestsOn ${className}.${fieldName} Timeout');
+								p.boundPromise.reject('PromiseTestRunner runTestsOn ${className}.${fieldName} Timeout');
+								p = null;
 							}
 						}, timeout);
 						result
 							.then(function(out) {
 								timer.stop();
-								if (!promise.boundPromise.isErrored() && !promise.boundPromise.isFulfilled() && !promise.boundPromise.isRejected() && !promise.boundPromise.isResolved()) {
-									promise.resolve(out);
+								if (p != null) {
+									p.resolve(out);
+									p = null;
 								}
 							})
 							.catchError(function(err) {
 								timer.stop();
-								promise.boundPromise.reject(err);
+								if (p != null) {
+									p.boundPromise.reject(err);
+									p = null;
+								} else {
+									trace(err);
+								}
 							});
-						return promise.boundPromise;
+						return p.boundPromise;
 					})
 					.pipe(function(didPass :Bool) {
 						if (didPass) {
@@ -209,9 +229,11 @@ class PromiseTestRunner
 			}
 		}
 
-		nextTest(getActiveTests(testObj));
+		js.Node.setTimeout(function() {
+			nextTest(getActiveTests(testObj));
+		}, 0);
 
-		return promise;
+		return promise.boundPromise;
 	}
 
 	private static function getActiveTests(testObj :PromiseTest) :Array<String>
