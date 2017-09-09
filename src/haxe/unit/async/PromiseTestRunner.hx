@@ -10,6 +10,8 @@ import promhx.Deferred;
 import promhx.Promise;
 import promhx.deferred.DeferredPromise;
 
+import t9.util.ColorTraces.*;
+
 using Lambda;
 using StringTools;
 
@@ -61,6 +63,7 @@ class PromiseTestRunner
 
 	public function run(?exitOnFinish :Bool = true, ?disableTrace :Bool = false) :Promise<CompleteTestResult>
 	{
+		filterOnly();
 		_disableTrace = disableTrace;
 		var promise = new DeferredPromise();
 		var success = true;
@@ -239,15 +242,24 @@ class PromiseTestRunner
 	private static function getActiveTests(testObj :PromiseTest) :Array<String>
 	{
 		var testClass = Type.getClass(testObj);
+		var only :String = null;
 		return Type.getInstanceFields(testClass).filter(function (fieldName) {
 			if (fieldName.startsWith("test")) {
 				var fieldMetaData = Reflect.field(Meta.getFields(testClass), fieldName);
+				if (fieldMetaData != null && Reflect.hasField(fieldMetaData, 'only')) {
+					only = fieldName;
+				}
 				if (fieldMetaData == null || !Reflect.hasField(fieldMetaData, 'skip')) {
 					return true;
 				}
 			}
-
 			return false;
+		}).filter(function(fieldName) {
+			if (only == null) {
+				return true;
+			} else {
+				return fieldName == only;
+			}
 		});
 	}
 
@@ -259,6 +271,25 @@ class PromiseTestRunner
 	public function getTotalTestsPassed() :Int
 	{
 		return _totalTestsPassed;
+	}
+
+	function filterOnly()
+	{
+		var only = _tests.find(function(testObj) {
+			var testClass = Type.getClass(testObj);
+			return Type.getInstanceFields(testClass).exists(function (fieldName) {
+				if (fieldName.startsWith("test")) {
+					var fieldMetaData = Reflect.field(Meta.getFields(testClass), fieldName);
+					if (fieldMetaData != null && Reflect.hasField(fieldMetaData, 'only')) {
+						return true;
+					}
+				}
+				return false;
+			});
+		});
+		if (only != null) {
+			_tests = [only];
+		}
 	}
 
 	function traceRed(s :Dynamic)

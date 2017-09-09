@@ -4,6 +4,7 @@
 
 -lib promhx:1.1.0
 -lib hxnodejs:4.0.9
+-lib hx-color-trace
 
 -cp src
 -cp test

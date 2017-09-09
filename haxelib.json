@@ -16,10 +16,11 @@
     "contributors": [
         "dionjwa"
     ], 
-    "releasenote": "Fixed multiple promise resolving", 
-    "version": "2.1.3", 
+    "releasenote": "Added @only flat for precise testing", 
+    "version": "2.2.0", 
     "dependencies": {
-        "promhx": "1.1.0"
+        "promhx": "1.1.0",
+        "hx-color-trace": "0.0.7"
     }, 
     "name": "promhx-unit-test"
 }
